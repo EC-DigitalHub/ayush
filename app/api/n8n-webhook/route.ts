@@ -61,10 +61,9 @@ export async function POST(req: NextRequest) {
     let message = 'Failed to process audio with n8n webhook';
     if (error instanceof Error) {
       message = error.message;
-      console.error('Error forwarding to n8n webhook:', error);
-    } else {
-      console.error('Error forwarding to n8n webhook:', error);
     }
+    // Always reference error to satisfy linter
+    console.error('Error forwarding to n8n webhook:', error);
     return new Response(JSON.stringify({
       success: false,
       error: message
