@@ -42,12 +42,17 @@ export async function POST(req: NextRequest) {
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    console.error('Mock webhook error:', error);
-    
+  } catch (error: unknown) {
+    let message = 'Failed to process request';
+    if (error instanceof Error) {
+      message = error.message;
+      console.error('Mock webhook error:', error);
+    } else {
+      console.error('Mock webhook error:', error);
+    }
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to process request'
+      error: message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

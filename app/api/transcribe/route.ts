@@ -32,12 +32,17 @@ export async function POST(req: NextRequest) {
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    console.error('Transcription error:', error);
-    
+  } catch (error: unknown) {
+    let message = 'Failed to transcribe audio';
+    if (error instanceof Error) {
+      message = error.message;
+      console.error('Transcription error:', error);
+    } else {
+      console.error('Transcription error:', error);
+    }
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to transcribe audio'
+      error: message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

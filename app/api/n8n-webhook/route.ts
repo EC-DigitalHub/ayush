@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     let data;
     try {
       data = await response.json();
-    } catch (parseError) {
+    } catch (error: unknown) {
       // If response is not JSON, get it as text
       const textResponse = await response.text();
       data = { text: textResponse };
@@ -57,12 +57,17 @@ export async function POST(req: NextRequest) {
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    console.error('Error forwarding to n8n webhook:', error);
-    
+  } catch (error: unknown) {
+    let message = 'Failed to process audio with n8n webhook';
+    if (error instanceof Error) {
+      message = error.message;
+      console.error('Error forwarding to n8n webhook:', error);
+    } else {
+      console.error('Error forwarding to n8n webhook:', error);
+    }
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to process audio with n8n webhook'
+      error: message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

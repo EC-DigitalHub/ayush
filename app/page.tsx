@@ -5,7 +5,6 @@ export default function Home() {
   // Load chat history from localStorage on component mount
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'bot', content: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -83,9 +82,12 @@ export default function Home() {
         setRecordingTime(prev => prev + 1);
       }, 1000);
       
-    } catch (err: any) {
-      console.error("Error accessing microphone:", err);
-      setError(`Microphone access error: ${err.message}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Error accessing microphone:", err);
+      } else {
+        console.error("Error accessing microphone:", err);
+      }
     }
   };
 
@@ -168,14 +170,18 @@ export default function Home() {
         content: content
       }]);
       
-    } catch (err: any) {
-      console.error("Error sending audio to webhook:", err);
-      setError(`Error: ${err.message}`);
-      
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (err instanceof Error) {
+        message = err.message;
+        console.error("Error sending audio to webhook:", err);
+      } else {
+        console.error("Error sending audio to webhook:", err);
+      }
       // Show error in chat
       setMessages(prev => [...prev, {
         role: 'bot',
-        content: `Error: ${err.message}. Please try again.`
+        content: `Error: ${message}. Please try again.`
       }]);
     } finally {
       setLoading(false);
@@ -192,7 +198,7 @@ export default function Home() {
   return (
     <div className="app-container">
       <div className="header">
-        <h1>Ayush's assistant</h1>
+        <h1>Ayush&apos;s assistant</h1>
         {messages.length > 0 && (
           <button onClick={clearChatHistory} className="clear-button">
             Clear History
